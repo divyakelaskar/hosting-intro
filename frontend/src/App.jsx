@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/items"; // Update when deployed
+const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
   const [items, setItems] = useState([]);
@@ -11,7 +11,9 @@ function App() {
   const [editItem, setEditItem] = useState({ name: "", value: "" });
 
   useEffect(() => {
-    axios.get(API_URL).then(res => setItems(res.data)).catch(err => console.error("Error fetching data:", err));
+    axios.get(`${API_URL}/items`)
+      .then(res => setItems(res.data))
+      .catch(err => console.error("Error fetching data:", err));
   }, []);
 
   const handleCreate = () => {
@@ -23,7 +25,7 @@ function App() {
       alert("Both fields are required!");
       return;
     }
-    axios.post(API_URL, newItem)
+    axios.post(`${API_URL}/items`, newItem)
       .then(res => {
         setItems([...items, res.data]);
         setNewItem({ name: "", value: "" });
@@ -33,7 +35,7 @@ function App() {
   };
 
   const handleDelete = (id) => {
-    axios.delete(`${API_URL}/${id}`)
+    axios.delete(`${API_URL}/items/${id}`)
       .then(() => setItems(items.filter(item => item.id !== id)))
       .catch(err => console.error("Error deleting item:", err));
   };
@@ -44,7 +46,7 @@ function App() {
   };
 
   const handleUpdate = () => {
-    axios.put(`${API_URL}/${editId}`, editItem)
+    axios.put(`${API_URL}/items/${editId}`, editItem)
       .then(() => {
         setItems(items.map(item => (item.id === editId ? { ...item, ...editItem } : item)));
         setEditId(null);
