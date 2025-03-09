@@ -7,7 +7,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// MySQL Connection
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -16,11 +15,10 @@ const db = mysql.createConnection({
 });
 
 db.connect(err => {
-    if (err) console.error("Database connection failed:", err);
-    else console.log("Connected to MySQL!");
+    if (err) console.error("🚫 Database connection failed :", err);
+    else console.log("✅ Connected to MySQL!");
 });
 
-// CRUD API
 app.get("/items", (req, res) => {
     db.query("SELECT * FROM items", (err, results) => {
         if (err) return res.status(500).json(err);
