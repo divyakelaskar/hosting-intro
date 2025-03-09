@@ -1,24 +1,33 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
+const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
-    database: process.env.DB_NAME
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-db.connect(err => {
-    if (err) console.error("🚫 Database connection failed :", err);
-    else console.log("✅ Connected to MySQL!");
+db.getConnection((err, connection) => {
+    if (err) {
+        console.error("🚫 Database connection failed:", err);
+    } else {
+        console.log("✅ Connected to MySQL!");
+        connection.release();
+    }
 });
 
+// Routes
 app.get("/items", (req, res) => {
     db.query("SELECT * FROM items", (err, results) => {
         if (err) return res.status(500).json(err);
@@ -58,11 +67,11 @@ if (SERVER_URL) {
     setInterval(() => {
         axios.get(`${SERVER_URL}/items`)
             .then(() => console.log("✅ Self-ping successful"))
-            .catch(err => console.error("🚫 Self-ping failed :", err.message));
+            .catch(err => console.error("🚫 Self-ping failed:", err.message));
     }, SELF_PING_INTERVAL);
 } else {
     console.warn("⚠️ SERVER_URL is not defined in .env. Self-ping disabled.");
 }
 
 const PORT = process.env.PORT;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
