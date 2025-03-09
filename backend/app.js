@@ -51,5 +51,18 @@ app.delete("/items/:id", (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
+const SELF_PING_INTERVAL = 14 * 60 * 1000;
+const SERVER_URL = process.env.SERVER_URL;
+
+if (SERVER_URL) {
+    setInterval(() => {
+        axios.get(`${SERVER_URL}/items`)
+            .then(() => console.log("✅ Self-ping successful"))
+            .catch(err => console.error("🚫 Self-ping failed :", err.message));
+    }, SELF_PING_INTERVAL);
+} else {
+    console.warn("⚠️ SERVER_URL is not defined in .env. Self-ping disabled.");
+}
+
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
